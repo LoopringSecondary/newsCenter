@@ -9,7 +9,7 @@
 
 ## 接口示例
 ```
-curl 127.0.0.1:3000 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"quer":"ALL","pageIndex":0,"pageSize":5},"id":64}'
+curl 127.0.0.1:3000 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"query":"ALL","pageIndex":0,"pageSize":5},"id":64}'
 ```
 Respose
 ```
