@@ -19,8 +19,14 @@ Respose
 "result":
     {"data":
         [
-            {"title":"文章1","content":"文章1正文","category":"ALL"},
-            {"title":"文章2","content":"文章2正文","category":"ALL"}
+            {"title":"文章2",
+            "content":"文章2正文",
+            "category":"ALL",
+            “url”:"",
+            "publishTime":"",
+            "source":"",
+            "author":"",
+            "imageUrl":"" }
         ],
     "pageIndex":0,
     "pageSize":5
