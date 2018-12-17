@@ -47,13 +47,16 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
     item.title = queryResult[i].title;
     item.content = queryResult[i].content;
     item.category = queryResult[i].category;
+    item.url = queryResult[i].url;
     item.publishTime = queryResult[i].publish_time_str;
+    item.source = queryResult[i].source;
     item.author = queryResult[i].author;
+    item.imageUrl = queryResult[i].imageUrl;
     results.data.push(item);
   }
   results.pageIndex = pageIndex;
   results.pageSize = pageSize;
-  console.log(queryResult);
+  //console.log(queryResult);
   return results;
 }
 
@@ -61,9 +64,10 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
 var server = jayson.server({
   query: function(args, callback) {
     var category = args.category;
+    var language = args.language;
     var pageIndex = args.pageIndex;
     var pageSize = args.pageSize;
-    console.log(args);
+    log.info(args);
     if(!isPositiveInt(pageIndex) && !isPositiveInt(pageSize)) {
       var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
       callback(error, null);

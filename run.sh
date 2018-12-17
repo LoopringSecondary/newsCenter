@@ -5,4 +5,4 @@
 
 thrift --gen js:node -o ./ proto/data.thrift
 
-node newsServer.js
+nohup node newsServer.js &

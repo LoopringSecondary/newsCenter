@@ -39,7 +39,6 @@ var NewsItem = module.exports.NewsItem = function(args) {
   this.source = null;
   this.author = null;
   this.imageUrl = null;
-  this.newsTime = null;
   if (args) {
     if (args.title !== undefined && args.title !== null) {
       this.title = args.title;
@@ -64,9 +63,6 @@ var NewsItem = module.exports.NewsItem = function(args) {
     }
     if (args.imageUrl !== undefined && args.imageUrl !== null) {
       this.imageUrl = args.imageUrl;
-    }
-    if (args.newsTime !== undefined && args.newsTime !== null) {
-      this.newsTime = args.newsTime;
     }
   }
 };
@@ -140,13 +136,6 @@ NewsItem.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
-      case 9:
-      if (ftype == Thrift.Type.STRING) {
-        this.newsTime = input.readString();
-      } else {
-        input.skip(ftype);
-      }
-      break;
       default:
         input.skip(ftype);
     }
@@ -196,11 +185,6 @@ NewsItem.prototype.write = function(output) {
   if (this.imageUrl !== null && this.imageUrl !== undefined) {
     output.writeFieldBegin('imageUrl', Thrift.Type.STRING, 8);
     output.writeString(this.imageUrl);
-    output.writeFieldEnd();
-  }
-  if (this.newsTime !== null && this.newsTime !== undefined) {
-    output.writeFieldBegin('newsTime', Thrift.Type.STRING, 9);
-    output.writeString(this.newsTime);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

@@ -38,8 +38,7 @@ struct NewsItem {
     5: string publishTime
     6: string source
     7: string author
-    8: string imageUrl 
-    9: string newsTime
+    8: string imageUrl
 }
 
 struct NewsCollection {
