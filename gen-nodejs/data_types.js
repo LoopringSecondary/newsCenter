@@ -34,6 +34,11 @@ var NewsItem = module.exports.NewsItem = function(args) {
   this.title = null;
   this.content = null;
   this.category = null;
+  this.url = null;
+  this.publishTime = null;
+  this.source = null;
+  this.author = null;
+  this.imageUrl = null;
   this.newsTime = null;
   if (args) {
     if (args.title !== undefined && args.title !== null) {
@@ -44,6 +49,21 @@ var NewsItem = module.exports.NewsItem = function(args) {
     }
     if (args.category !== undefined && args.category !== null) {
       this.category = args.category;
+    }
+    if (args.url !== undefined && args.url !== null) {
+      this.url = args.url;
+    }
+    if (args.publishTime !== undefined && args.publishTime !== null) {
+      this.publishTime = args.publishTime;
+    }
+    if (args.source !== undefined && args.source !== null) {
+      this.source = args.source;
+    }
+    if (args.author !== undefined && args.author !== null) {
+      this.author = args.author;
+    }
+    if (args.imageUrl !== undefined && args.imageUrl !== null) {
+      this.imageUrl = args.imageUrl;
     }
     if (args.newsTime !== undefined && args.newsTime !== null) {
       this.newsTime = args.newsTime;
@@ -87,6 +107,41 @@ NewsItem.prototype.read = function(input) {
       break;
       case 4:
       if (ftype == Thrift.Type.STRING) {
+        this.url = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 5:
+      if (ftype == Thrift.Type.STRING) {
+        this.publishTime = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 6:
+      if (ftype == Thrift.Type.STRING) {
+        this.source = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 7:
+      if (ftype == Thrift.Type.STRING) {
+        this.author = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 8:
+      if (ftype == Thrift.Type.STRING) {
+        this.imageUrl = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 9:
+      if (ftype == Thrift.Type.STRING) {
         this.newsTime = input.readString();
       } else {
         input.skip(ftype);
@@ -118,8 +173,33 @@ NewsItem.prototype.write = function(output) {
     output.writeString(this.category);
     output.writeFieldEnd();
   }
+  if (this.url !== null && this.url !== undefined) {
+    output.writeFieldBegin('url', Thrift.Type.STRING, 4);
+    output.writeString(this.url);
+    output.writeFieldEnd();
+  }
+  if (this.publishTime !== null && this.publishTime !== undefined) {
+    output.writeFieldBegin('publishTime', Thrift.Type.STRING, 5);
+    output.writeString(this.publishTime);
+    output.writeFieldEnd();
+  }
+  if (this.source !== null && this.source !== undefined) {
+    output.writeFieldBegin('source', Thrift.Type.STRING, 6);
+    output.writeString(this.source);
+    output.writeFieldEnd();
+  }
+  if (this.author !== null && this.author !== undefined) {
+    output.writeFieldBegin('author', Thrift.Type.STRING, 7);
+    output.writeString(this.author);
+    output.writeFieldEnd();
+  }
+  if (this.imageUrl !== null && this.imageUrl !== undefined) {
+    output.writeFieldBegin('imageUrl', Thrift.Type.STRING, 8);
+    output.writeString(this.imageUrl);
+    output.writeFieldEnd();
+  }
   if (this.newsTime !== null && this.newsTime !== undefined) {
-    output.writeFieldBegin('newsTime', Thrift.Type.STRING, 4);
+    output.writeFieldBegin('newsTime', Thrift.Type.STRING, 9);
     output.writeString(this.newsTime);
     output.writeFieldEnd();
   }

@@ -5,6 +5,23 @@ var DataTypes      = require('./gen-nodejs/data_types'),
     NewsItem       = DataTypes.NewsItem,
     NewsCollection = DataTypes.NewsCollection;
 
+/**
+ * make a log directory, just in case it isn't there.
+ */
+try {
+  require('fs').mkdirSync('./log');
+} catch (e) {
+  if (e.code != 'EEXIST') {
+    console.error("Could not set up log directory, error was: ", e);
+    process.exit(1);
+  }
+}
+
+var log4js = require('log4js');
+log4js.configure('./config/log4js.json');
+
+var log = log4js.getLogger("newscenter");
+
 var pool  = mysql.createPool({
   connectionLimit : 10,
   host            : 'localhost',
@@ -21,7 +38,7 @@ function isPositiveInt(input) {
   return true;
 }
 
-function constructRespose(queryResult, pageIndex, pageSize) {
+function constructRespose(queryResult, category, pageIndex, pageSize) {
   var results = new NewsCollection();            
   results.data = [];
   var item = new NewsItem();
@@ -30,13 +47,13 @@ function constructRespose(queryResult, pageIndex, pageSize) {
     item.title = queryResult[i].title;
     item.content = queryResult[i].content;
     item.category = queryResult[i].category;
-    item.newsTime = queryResult[i].insert_ime;
+    item.publishTime = queryResult[i].publish_time_str;
+    item.author = queryResult[i].author;
     results.data.push(item);
   }
   results.pageIndex = pageIndex;
   results.pageSize = pageSize;
   console.log(queryResult);
-  console.log(queryResult.length);
   return results;
 }
 
@@ -51,8 +68,8 @@ var server = jayson.server({
       var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
       callback(error, null);
     } else {
-      var sql = 'SELECT * FROM news_tbl where category="' + category + '" limit ' + pageIndex + ',' + pageSize;
-      console.log(sql);
+      var sql = 'SELECT * FROM jinse_news where title like "%' + category + '%" limit ' + pageIndex + ',' + pageSize;
+      log.info(sql);
       pool.getConnection(function(connetErr, connection) {
         if (connetErr) {
           var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_CONNECT_ERROR'};
@@ -66,7 +83,7 @@ var server = jayson.server({
               var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_QUERY_ERROR'};
               callback(error, null);
             } else {
-              var results = constructRespose(queryResult, pageIndex, pageSize);
+              var results = constructRespose(queryResult, category, pageIndex, pageSize);
               callback(null, results);
             }
           });

@@ -34,9 +34,13 @@ struct NewsItem {
     1: string title
     2: string content
     3: string category
-    4: optional string newsTime
+    4: string url
+    5: string publishTime
+    6: string source
+    7: string author
+    8: string imageUrl 
+    9: string newsTime
 }
-
 
 struct NewsCollection {
     1: list<NewsItem> data
