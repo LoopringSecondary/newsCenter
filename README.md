@@ -11,7 +11,7 @@
 ```
 curl 127.0.0.1:3000 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"query":"ALL","pageIndex":0,"pageSize":5},"id":64}'
 ```
-Respose
+Normal respose
 ```
 {
 "jsonrpc":"2.0",
@@ -32,4 +32,8 @@ Respose
     "pageSize":5
     }
 }
+```
+Abnormal response
+```
+{"jsonrpc":"2.0","id":64,"error":{"code":-32603,"message":"Internal error"}}
 ```
