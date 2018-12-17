@@ -4,6 +4,7 @@ var DataTypes      = require('./gen-nodejs/data_types'),
     ErrorCode      = DataTypes.ErrorCode,
     NewsItem       = DataTypes.NewsItem,
     NewsCollection = DataTypes.NewsCollection;
+var moment = require('moment');
 
 /**
  * make a log directory, just in case it isn't there.
@@ -20,6 +21,7 @@ try {
 var log4js = require('log4js');
 log4js.configure('./config/log4js.json');
 
+//var log = log4js.getLogger("newscenter");
 var log = log4js.getLogger("newscenter");
 
 var pool  = mysql.createPool({
@@ -27,7 +29,8 @@ var pool  = mysql.createPool({
   host            : 'localhost',
   user            : 'root',
   password        : '123456',
-  database        : 'newscenter'
+  database        : 'crawler',
+  charset        : 'utf8',
 });
 
 function isPositiveInt(input) { 
@@ -48,7 +51,8 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
     item.content = queryResult[i].content;
     item.category = queryResult[i].category;
     item.url = queryResult[i].url;
-    item.publishTime = queryResult[i].publish_time_str;
+    var insertTime = (new Date(queryResult[i].insert_time)).getTime();
+    item.publishTime = moment.unix(insertTime/1000).utc().format("YYYY-MM-DD HH:mm");
     item.source = queryResult[i].source;
     item.author = queryResult[i].author;
     item.imageUrl = queryResult[i].imageUrl;
@@ -97,6 +101,6 @@ var server = jayson.server({
   }
 });
 
-server.http().listen(3000, function() {
-  console.log('News center sever is istening on *:3000:)');
+server.http().listen(5555, function() {
+  console.log('News center sever is istening on *:5555:)');
 });
