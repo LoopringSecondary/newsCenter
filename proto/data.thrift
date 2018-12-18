@@ -14,15 +14,14 @@ enum ErrorCode {
 }
 
 enum Currency {
-    UNKNOWN = 0
+    ALL_CURRENCY = 0
     BTC = 1
     ETH = 2
 }
 
-enum category {
-    ALL = 0
-    ETH = 1
-    LRC = 2
+enum Category {
+    INFORMATION = 0
+    FLASH = 1
 }
 
 enum Language {
@@ -33,7 +32,7 @@ enum Language {
 struct NewsItem {
     1: string title
     2: string content
-    3: string category
+    3: i64    category
     4: string url
     5: string publishTime
     6: string source

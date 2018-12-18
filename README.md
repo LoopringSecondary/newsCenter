@@ -9,7 +9,7 @@
 
 ## 接口示例
 ```
-curl 127.0.0.1:3000 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"query",currency:"LRC",category:"information",pageIndex":0,"pageSize":5,"language":"cn"},"id":64}'
+curl 127.0.0.1:3000 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"query","currency":"LRC","language":0,"category":0,"pageIndex":0,"pageSize":5},"id":64}'
 ```
 Normal respose
 ```
@@ -22,7 +22,7 @@ Normal respose
             {"title":"文章2",
             "content":"文章2正文",
             "currency":"LRC",
-            "category":"information"
+            "category":0
             “url”:"",
             "publishTime":"",
             "source":"",

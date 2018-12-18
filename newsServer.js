@@ -5,6 +5,8 @@ var log4js         = require('log4js');
 var DataTypes      = require('./gen-nodejs/data_types'),
     ErrorCode      = DataTypes.ErrorCode,
     NewsItem       = DataTypes.NewsItem,
+    Language       = DataTypes.Language,
+    Category       = DataTypes.Category,
     NewsCollection = DataTypes.NewsCollection;
 
 /**
@@ -19,7 +21,6 @@ try {
   }
 }
 
-
 log4js.configure('./config/log4js.json');
 var log = log4js.getLogger("newscenter");
 
@@ -33,10 +34,23 @@ var pool  = mysql.createPool({
 });
 
 function isPositiveInt(input) { 
-  var re = /^[0-9]+.?[0-9]*/;
-  if (!re.test(input) || (input <= 0)) { 
+  var re =  /^\d+$/;
+  if (!re.test(input)) { 
     return false;
   } 
+  return true;
+}
+
+function checkQueryParameters(currency, category, language, pageIndex, pageSize) {
+  if(category != Category.INFORMATION && category != Category.FLASH) {
+    return false;
+  }
+  if(language != Language.CHINESE && language != Language.ENGLISH) {
+    return false;
+  }
+  if(!isPositiveInt(pageIndex) && !isPositiveInt(pageSize) && pageSize > 10) {
+    return false;
+  }
   return true;
 }
 
@@ -46,9 +60,12 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
   var item = new NewsItem();
   for (var i = 0; i < queryResult.length; i++) {
     var item = new NewsItem();
+    if (queryResult[i].title == null || queryResult[i].content == null) {
+      continue;
+    }
     item.title = queryResult[i].title;
     item.content = queryResult[i].content;
-    item.category = queryResult[i].category;
+    item.category = category;
     item.url = queryResult[i].url;
     var insertTime = (new Date(queryResult[i].insert_time)).getTime();
     item.publishTime = moment.unix(insertTime/1000).utc().format("YYYY-MM-DD HH:mm");
@@ -59,7 +76,21 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
   }
   results.pageIndex = pageIndex;
   results.pageSize = pageSize;
+  log.info("respose: " + results.data.length + " records");
   return results;
+}
+
+function constructSql(currency, category, language, pageIndex, pageSize) {
+    var sqlStr = "";
+    switch(currency) {
+      case "ALL_CURRENCY":
+          sqlStr = 'SELECT * FROM jinse_news limit ' + pageIndex + ',' + pageSize;
+          break;
+      default:
+          sqlStr = 'SELECT * FROM jinse_news where title like "%' + currency + '%" limit ' + pageIndex + ',' + pageSize;
+          break;
+    }
+    return sqlStr;
 }
 
 // create a server
@@ -71,11 +102,11 @@ var server = jayson.server({
     var pageIndex = args.pageIndex;
     var pageSize = args.pageSize;
     log.info(args);
-    if(!isPositiveInt(pageIndex) && !isPositiveInt(pageSize) && pageSize > 10) {
+    if(!checkQueryParameters(currency, category, language, pageIndex, pageSize)) {
       var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
       callback(error, null);
     } else {
-      var sql = 'SELECT * FROM jinse_news where title like "%' + currency + '%" limit ' + pageIndex + ',' + pageSize;
+      var sql = constructSql(currency, category, language, pageIndex, pageSize);
       log.info(sql);
       pool.getConnection(function(connetErr, connection) {
         if (connetErr) {

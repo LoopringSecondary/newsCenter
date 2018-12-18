@@ -17,14 +17,13 @@ ttypes.ErrorCode = {
   'DATABASE_QUERY_ERROR' : 10002
 };
 ttypes.Currency = {
-  'UNKNOWN' : 0,
+  'ALL_CURRENCY' : 0,
   'BTC' : 1,
   'ETH' : 2
 };
-ttypes.category = {
-  'ALL' : 0,
-  'ETH' : 1,
-  'LRC' : 2
+ttypes.Category = {
+  'INFORMATION' : 0,
+  'FLASH' : 1
 };
 ttypes.Language = {
   'CHINESE' : 0,
@@ -95,8 +94,8 @@ NewsItem.prototype.read = function(input) {
       }
       break;
       case 3:
-      if (ftype == Thrift.Type.STRING) {
-        this.category = input.readString();
+      if (ftype == Thrift.Type.I64) {
+        this.category = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -158,8 +157,8 @@ NewsItem.prototype.write = function(output) {
     output.writeFieldEnd();
   }
   if (this.category !== null && this.category !== undefined) {
-    output.writeFieldBegin('category', Thrift.Type.STRING, 3);
-    output.writeString(this.category);
+    output.writeFieldBegin('category', Thrift.Type.I64, 3);
+    output.writeI64(this.category);
     output.writeFieldEnd();
   }
   if (this.url !== null && this.url !== undefined) {
