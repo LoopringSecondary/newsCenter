@@ -1,10 +1,11 @@
 var jayson         = require('jayson');
 var mysql          = require('mysql');
+var moment         = require('moment');
+var log4js         = require('log4js');
 var DataTypes      = require('./gen-nodejs/data_types'),
     ErrorCode      = DataTypes.ErrorCode,
     NewsItem       = DataTypes.NewsItem,
     NewsCollection = DataTypes.NewsCollection;
-var moment = require('moment');
 
 /**
  * make a log directory, just in case it isn't there.
@@ -18,19 +19,17 @@ try {
   }
 }
 
-var log4js = require('log4js');
-log4js.configure('./config/log4js.json');
 
-//var log = log4js.getLogger("newscenter");
+log4js.configure('./config/log4js.json');
 var log = log4js.getLogger("newscenter");
 
 var pool  = mysql.createPool({
   connectionLimit : 10,
   host            : 'localhost',
   user            : 'root',
-  password        : '123456',
+  password        : '111111',
   database        : 'crawler',
-  charset        : 'utf8',
+  charset         : 'utf8',
 });
 
 function isPositiveInt(input) { 
@@ -60,23 +59,23 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
   }
   results.pageIndex = pageIndex;
   results.pageSize = pageSize;
-  //console.log(queryResult);
   return results;
 }
 
 // create a server
 var server = jayson.server({
   query: function(args, callback) {
+    var currency = args.currency;
     var category = args.category;
     var language = args.language;
     var pageIndex = args.pageIndex;
     var pageSize = args.pageSize;
     log.info(args);
-    if(!isPositiveInt(pageIndex) && !isPositiveInt(pageSize)) {
+    if(!isPositiveInt(pageIndex) && !isPositiveInt(pageSize) && pageSize > 10) {
       var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
       callback(error, null);
     } else {
-      var sql = 'SELECT * FROM jinse_news where title like "%' + category + '%" limit ' + pageIndex + ',' + pageSize;
+      var sql = 'SELECT * FROM jinse_news where title like "%' + currency + '%" limit ' + pageIndex + ',' + pageSize;
       log.info(sql);
       pool.getConnection(function(connetErr, connection) {
         if (connetErr) {
@@ -102,5 +101,5 @@ var server = jayson.server({
 });
 
 server.http().listen(5555, function() {
-  console.log('News center sever is istening on *:5555:)');
+  console.log('News center sever is istening on: 5555:)');
 });
