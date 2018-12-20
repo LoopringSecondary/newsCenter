@@ -30,6 +30,7 @@ ttypes.Language = {
   'ENGLISH' : 1
 };
 var NewsItem = module.exports.NewsItem = function(args) {
+  this.uuid = null;
   this.title = null;
   this.content = null;
   this.category = null;
@@ -38,7 +39,13 @@ var NewsItem = module.exports.NewsItem = function(args) {
   this.source = null;
   this.author = null;
   this.imageUrl = null;
+  this.bullIndex = null;
+  this.bearIndex = null;
+  this.forwardNum = null;
   if (args) {
+    if (args.uuid !== undefined && args.uuid !== null) {
+      this.uuid = args.uuid;
+    }
     if (args.title !== undefined && args.title !== null) {
       this.title = args.title;
     }
@@ -63,6 +70,15 @@ var NewsItem = module.exports.NewsItem = function(args) {
     if (args.imageUrl !== undefined && args.imageUrl !== null) {
       this.imageUrl = args.imageUrl;
     }
+    if (args.bullIndex !== undefined && args.bullIndex !== null) {
+      this.bullIndex = args.bullIndex;
+    }
+    if (args.bearIndex !== undefined && args.bearIndex !== null) {
+      this.bearIndex = args.bearIndex;
+    }
+    if (args.forwardNum !== undefined && args.forwardNum !== null) {
+      this.forwardNum = args.forwardNum;
+    }
   }
 };
 NewsItem.prototype = {};
@@ -81,56 +97,84 @@ NewsItem.prototype.read = function(input) {
     {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.title = input.readString();
+        this.uuid = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.content = input.readString();
+        this.title = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.content = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
       if (ftype == Thrift.Type.I64) {
         this.category = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
-      case 4:
+      case 5:
       if (ftype == Thrift.Type.STRING) {
         this.url = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
-      case 5:
+      case 6:
       if (ftype == Thrift.Type.STRING) {
         this.publishTime = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
-      case 6:
+      case 7:
       if (ftype == Thrift.Type.STRING) {
         this.source = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
-      case 7:
+      case 8:
       if (ftype == Thrift.Type.STRING) {
         this.author = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
-      case 8:
+      case 9:
       if (ftype == Thrift.Type.STRING) {
         this.imageUrl = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 10:
+      if (ftype == Thrift.Type.I64) {
+        this.bullIndex = input.readI64();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 11:
+      if (ftype == Thrift.Type.I64) {
+        this.bearIndex = input.readI64();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 12:
+      if (ftype == Thrift.Type.I64) {
+        this.forwardNum = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -146,44 +190,64 @@ NewsItem.prototype.read = function(input) {
 
 NewsItem.prototype.write = function(output) {
   output.writeStructBegin('NewsItem');
+  if (this.uuid !== null && this.uuid !== undefined) {
+    output.writeFieldBegin('uuid', Thrift.Type.STRING, 1);
+    output.writeString(this.uuid);
+    output.writeFieldEnd();
+  }
   if (this.title !== null && this.title !== undefined) {
-    output.writeFieldBegin('title', Thrift.Type.STRING, 1);
+    output.writeFieldBegin('title', Thrift.Type.STRING, 2);
     output.writeString(this.title);
     output.writeFieldEnd();
   }
   if (this.content !== null && this.content !== undefined) {
-    output.writeFieldBegin('content', Thrift.Type.STRING, 2);
+    output.writeFieldBegin('content', Thrift.Type.STRING, 3);
     output.writeString(this.content);
     output.writeFieldEnd();
   }
   if (this.category !== null && this.category !== undefined) {
-    output.writeFieldBegin('category', Thrift.Type.I64, 3);
+    output.writeFieldBegin('category', Thrift.Type.I64, 4);
     output.writeI64(this.category);
     output.writeFieldEnd();
   }
   if (this.url !== null && this.url !== undefined) {
-    output.writeFieldBegin('url', Thrift.Type.STRING, 4);
+    output.writeFieldBegin('url', Thrift.Type.STRING, 5);
     output.writeString(this.url);
     output.writeFieldEnd();
   }
   if (this.publishTime !== null && this.publishTime !== undefined) {
-    output.writeFieldBegin('publishTime', Thrift.Type.STRING, 5);
+    output.writeFieldBegin('publishTime', Thrift.Type.STRING, 6);
     output.writeString(this.publishTime);
     output.writeFieldEnd();
   }
   if (this.source !== null && this.source !== undefined) {
-    output.writeFieldBegin('source', Thrift.Type.STRING, 6);
+    output.writeFieldBegin('source', Thrift.Type.STRING, 7);
     output.writeString(this.source);
     output.writeFieldEnd();
   }
   if (this.author !== null && this.author !== undefined) {
-    output.writeFieldBegin('author', Thrift.Type.STRING, 7);
+    output.writeFieldBegin('author', Thrift.Type.STRING, 8);
     output.writeString(this.author);
     output.writeFieldEnd();
   }
   if (this.imageUrl !== null && this.imageUrl !== undefined) {
-    output.writeFieldBegin('imageUrl', Thrift.Type.STRING, 8);
+    output.writeFieldBegin('imageUrl', Thrift.Type.STRING, 9);
     output.writeString(this.imageUrl);
+    output.writeFieldEnd();
+  }
+  if (this.bullIndex !== null && this.bullIndex !== undefined) {
+    output.writeFieldBegin('bullIndex', Thrift.Type.I64, 10);
+    output.writeI64(this.bullIndex);
+    output.writeFieldEnd();
+  }
+  if (this.bearIndex !== null && this.bearIndex !== undefined) {
+    output.writeFieldBegin('bearIndex', Thrift.Type.I64, 11);
+    output.writeI64(this.bearIndex);
+    output.writeFieldEnd();
+  }
+  if (this.forwardNum !== null && this.forwardNum !== undefined) {
+    output.writeFieldBegin('forwardNum', Thrift.Type.I64, 12);
+    output.writeI64(this.forwardNum);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

@@ -33,7 +33,7 @@ var pool  = mysql.createPool({
   charset         : 'utf8',
 });
 
-function isPositiveInt(input) { 
+function isNonNegativeInt(input) { 
   var re =  /^\d+$/;
   if (!re.test(input)) { 
     return false;
@@ -48,7 +48,7 @@ function checkQueryParameters(currency, category, language, pageIndex, pageSize)
   if(language != Language.CHINESE && language != Language.ENGLISH) {
     return false;
   }
-  if(!isPositiveInt(pageIndex) && !isPositiveInt(pageSize) && pageSize > 10) {
+  if(!isNonNegativeInt(pageIndex) || !isNonNegativeInt(pageSize) || pageSize > 10) {
     return false;
   }
   return true;
@@ -63,15 +63,19 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
     if (queryResult[i].title == null || queryResult[i].content == null) {
       continue;
     }
+    item.uuid = queryResult[i].uuid;
     item.title = queryResult[i].title;
     item.content = queryResult[i].content;
     item.category = category;
     item.url = queryResult[i].url;
     var insertTime = (new Date(queryResult[i].insert_time)).getTime();
     item.publishTime = moment.unix(insertTime/1000).utc().format("YYYY-MM-DD HH:mm");
-    item.source = queryResult[i].source;
+    item.source = queryResult[i].source_site_name;
     item.author = queryResult[i].author;
     item.imageUrl = queryResult[i].imageUrl;
+    item.bullIndex = queryResult[i].bull_index;
+    item.bearIndex = queryResult[i].bear_index;
+    item.forwardNum = queryResult[i].forward_num;
     results.data.push(item);
   }
   results.pageIndex = pageIndex;
@@ -81,16 +85,31 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
 }
 
 function constructSql(currency, category, language, pageIndex, pageSize) {
-    var sqlStr = "";
-    switch(currency) {
-      case "ALL_CURRENCY":
-          sqlStr = 'SELECT * FROM jinse_news limit ' + pageIndex + ',' + pageSize;
-          break;
-      default:
-          sqlStr = 'SELECT * FROM jinse_news where title like "%' + currency + '%" limit ' + pageIndex + ',' + pageSize;
-          break;
-    }
-    return sqlStr;
+  var sqlStr = "";
+  var tableName = "";
+
+  switch(language) {
+    case 0:
+      tableName = "cn_info";
+      break;
+    case 1:
+      // TODO: support English
+      return sqlStr;
+    default:
+      return sqlStr;
+  }
+
+  var news_category = searchCategoryName(category);
+
+  switch(currency) {
+    case "ALL_CURRENCY":
+      sqlStr = 'select * from ' + tableName + ' where news_category = "' + news_category + '" order by insert_time DESC limit ' + pageIndex + ',' + pageSize;
+      break;
+    default:
+      sqlStr = 'select * from ' + tableName + ' where news_category = "' + news_category + '" and title like "%' + currency + '%"  order by insert_time DESC limit ' + pageIndex + ',' + pageSize;
+      break;
+  }
+  return sqlStr;
 }
 
 // create a server
@@ -108,29 +127,51 @@ var server = jayson.server({
     } else {
       var sql = constructSql(currency, category, language, pageIndex, pageSize);
       log.info(sql);
-      pool.getConnection(function(connetErr, connection) {
-        if (connetErr) {
-          var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_CONNECT_ERROR'};
-          callback(error, null);
-        } else {
-          // Use the connection
-          connection.query(sql, function (queryErr, queryResult, fields) {
-            // When done with the connection, release it.
-            connection.release();
-            if (queryErr) {
-              var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_QUERY_ERROR'};
-              callback(error, null);
-            } else {
-              var results = constructRespose(queryResult, category, pageIndex, pageSize);
-              callback(null, results);
-            }
-          });
-        }
-      });
+      if (sql != "") {
+        pool.getConnection(function(connetErr, connection) {
+          if (connetErr) {
+            var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_CONNECT_ERROR'};
+            callback(error, null);
+          } else {
+            // Use the connection
+            connection.query(sql, function (queryErr, queryResult, fields) {
+              // When done with the connection, release it.
+              connection.release();
+              if (queryErr) {
+                var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_QUERY_ERROR'};
+                callback(error, null);
+              } else {
+                var results = constructRespose(queryResult, category, pageIndex, pageSize);
+                callback(null, results);
+              }
+            });
+          }
+        });
+      } else {
+        var results = new NewsCollection();            
+        results.data = [];
+        callback(null, results);
+      }      
     }
   }
 });
 
+function searchLanguageName(myValue) {
+  for (prop in Language) {
+    if (Language[prop] == myValue) {
+      return prop;
+    }
+  }
+}
+
+function searchCategoryName(myValue) {
+  for (prop in Category) {
+    if (Category[prop] == myValue) {
+      return prop;
+    }
+  }
+}
+
 server.http().listen(5555, function() {
-  console.log('News center sever is istening on: 5555:)');
+  log.info('News center sever is istening on: 5555:)');
 });

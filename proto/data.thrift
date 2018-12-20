@@ -30,14 +30,19 @@ enum Language {
 }
 
 struct NewsItem {
-    1: string title
-    2: string content
-    3: i64    category
-    4: string url
-    5: string publishTime
-    6: string source
-    7: string author
-    8: string imageUrl
+    1: string uuid
+    2: string title
+    3: string content
+    4: i64    category
+    5: string url
+    6: string publishTime
+    7: string source
+    8: string author
+    9: string imageUrl
+    10: i64   bullIndex
+    11: i64   bearIndex
+    12: i64   forwardNum
+
 }
 
 struct NewsCollection {
