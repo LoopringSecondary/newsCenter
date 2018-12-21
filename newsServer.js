@@ -164,7 +164,7 @@ function constructSql(currency, category, language, pageIndex, pageSize) {
 
 // create a server
 var server = jayson.server({
-  query: function(args, callback) {
+  queryNews: function(args, callback) {
     var currency = args.currency;
     var category = args.category;
     var language = args.language;
@@ -244,6 +244,7 @@ var server = jayson.server({
                     } else {
                       console.log(result);
                       var response = new IndexResponse();
+                      response.uuid = uuid;
                       response.bullIndex = newIndex;
                       callback(null, response);
                     }
