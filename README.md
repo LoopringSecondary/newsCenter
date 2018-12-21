@@ -8,8 +8,10 @@
 ```sh run.sh```
 
 ## 接口示例
+
+### query news
 ```
-curl 127.0.0.1:3000 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"query","currency":"LRC","language":0,"category":0,"pageIndex":0,"pageSize":5},"id":64}'
+curl 127.0.0.1:3000 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"queryNews","currency":"LRC","language":0,"category":0,"pageIndex":0,"pageSize":5},"id":64}'
 ```
 Normal respose
 ```
@@ -19,7 +21,9 @@ Normal respose
 "result":
     {"data":
         [
-            {"title":"文章2",
+            {
+            "uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU="
+            "title":"文章2",
             "content":"文章2正文",
             "currency":"LRC",
             "category":0
@@ -27,10 +31,35 @@ Normal respose
             "publishTime":"",
             "source":"",
             "author":"",
-            "imageUrl":"" }
+            "imageUrl":"",
+            "bullIndex":4,
+            "bearIndex":0,
+            "forwardNum":0}
         ],
     "pageIndex":0,
     "pageSize":5
+    }
+}
+```
+Abnormal response
+```
+{"jsonrpc":"2.0","id":64,"error":{"code":-32603,"message":"Internal error"}}
+```
+
+### update index
+```
+curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"updateIndex","params":{"uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU=","indexName":"bull_index", "direction":1},"id":64}'
+```
+Normal response
+```
+{
+"jsonrpc":"2.0",
+"id":64,
+"result":{
+    "uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU",
+    "bullIndex":4,
+    "bearIndex":0,
+    "forwardNum":0
     }
 }
 ```
