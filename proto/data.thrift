@@ -11,6 +11,7 @@ enum ErrorCode {
     PARAMETER_ERROR          = 10001
     DATABASE_CONNECT_ERROR   = 10002
     DATABASE_QUERY_ERROR     = 10002
+    INDEX_CACULATE_ERROR     = 10003
 }
 
 enum Currency {
@@ -49,5 +50,12 @@ struct NewsCollection {
     1: list<NewsItem> data
     2: i64 pageIndex
     3: i64 pageSize 
+}
+
+struct IndexResponse {
+    1: string uuid
+    2: i64   bullIndex
+    3: i64   bearIndex
+    4: i64   forwardNum
 }
 

@@ -14,7 +14,8 @@ var ttypes = module.exports = {};
 ttypes.ErrorCode = {
   'PARAMETER_ERROR' : 10001,
   'DATABASE_CONNECT_ERROR' : 10002,
-  'DATABASE_QUERY_ERROR' : 10002
+  'DATABASE_QUERY_ERROR' : 10002,
+  'INDEX_CACULATE_ERROR' : 10003
 };
 ttypes.Currency = {
   'ALL_CURRENCY' : 0,
@@ -353,6 +354,104 @@ NewsCollection.prototype.write = function(output) {
   if (this.pageSize !== null && this.pageSize !== undefined) {
     output.writeFieldBegin('pageSize', Thrift.Type.I64, 3);
     output.writeI64(this.pageSize);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+var IndexResponse = module.exports.IndexResponse = function(args) {
+  this.uuid = null;
+  this.bullIndex = null;
+  this.bearIndex = null;
+  this.forwardNum = null;
+  if (args) {
+    if (args.uuid !== undefined && args.uuid !== null) {
+      this.uuid = args.uuid;
+    }
+    if (args.bullIndex !== undefined && args.bullIndex !== null) {
+      this.bullIndex = args.bullIndex;
+    }
+    if (args.bearIndex !== undefined && args.bearIndex !== null) {
+      this.bearIndex = args.bearIndex;
+    }
+    if (args.forwardNum !== undefined && args.forwardNum !== null) {
+      this.forwardNum = args.forwardNum;
+    }
+  }
+};
+IndexResponse.prototype = {};
+IndexResponse.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.uuid = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.I64) {
+        this.bullIndex = input.readI64();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 3:
+      if (ftype == Thrift.Type.I64) {
+        this.bearIndex = input.readI64();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 4:
+      if (ftype == Thrift.Type.I64) {
+        this.forwardNum = input.readI64();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+IndexResponse.prototype.write = function(output) {
+  output.writeStructBegin('IndexResponse');
+  if (this.uuid !== null && this.uuid !== undefined) {
+    output.writeFieldBegin('uuid', Thrift.Type.STRING, 1);
+    output.writeString(this.uuid);
+    output.writeFieldEnd();
+  }
+  if (this.bullIndex !== null && this.bullIndex !== undefined) {
+    output.writeFieldBegin('bullIndex', Thrift.Type.I64, 2);
+    output.writeI64(this.bullIndex);
+    output.writeFieldEnd();
+  }
+  if (this.bearIndex !== null && this.bearIndex !== undefined) {
+    output.writeFieldBegin('bearIndex', Thrift.Type.I64, 3);
+    output.writeI64(this.bearIndex);
+    output.writeFieldEnd();
+  }
+  if (this.forwardNum !== null && this.forwardNum !== undefined) {
+    output.writeFieldBegin('forwardNum', Thrift.Type.I64, 4);
+    output.writeI64(this.forwardNum);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

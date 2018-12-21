@@ -7,7 +7,8 @@ var DataTypes      = require('./gen-nodejs/data_types'),
     NewsItem       = DataTypes.NewsItem,
     Language       = DataTypes.Language,
     Category       = DataTypes.Category,
-    NewsCollection = DataTypes.NewsCollection;
+    NewsCollection = DataTypes.NewsCollection,
+    IndexResponse  = DataTypes.IndexResponse;
 
 /**
  * make a log directory, just in case it isn't there.
@@ -54,6 +55,19 @@ function checkQueryParameters(currency, category, language, pageIndex, pageSize)
   return true;
 }
 
+function checkUpdateParameters(uuid, indexName, direction) {
+  if (indexName != "bull_index" && indexName != "bear_index" && indexName != "forward_num") {
+    return false;
+  }
+  if (direction != -1 && direction != 1) {
+    return false;
+  }
+  if(indexName == "forward_num" && direction != 1) {
+    return false;
+  }
+  return true;
+}
+
 function constructRespose(queryResult, category, pageIndex, pageSize) {
   var results = new NewsCollection();            
   results.data = [];
@@ -82,6 +96,42 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
   results.pageSize = pageSize;
   log.info("respose: " + results.data.length + " records");
   return results;
+}
+
+function getNewIndex (uuid, indexName, direction, callback) {
+  var sql = 'select ' + indexName + ' from cn_info where uuid = "' + uuid + '"';
+  pool.getConnection(function(connetErr, connection) {
+    if (connetErr) {
+      var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_CONNECT_ERROR'};
+      callback(error, null);
+    } else {
+      // Use the connection
+      connection.query(sql, function (selectErr, queryResult, fields) {
+        // When done with the connection, release it.
+        connection.release();
+        if (selectErr) {
+          var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_SELECT_ERROR'};
+          callback(error, null);
+        } else {
+          console.log(queryResult);
+          if(queryResult.length != 1) {
+            var error = {code: ErrorCode.DATA_ERROR, message: 'DATA_ERROR'};
+            callback(error, null);
+          } else {
+            console.log("queryResult[0].bull_index = " + eval("queryResult[0]." + indexName))
+            var newIndex = eval("queryResult[0]." + indexName) + direction;
+            console.log(newIndex);
+            if (newIndex < 0) {
+              var error = {code: ErrorCode.DATA_ERROR, message: 'DATA_ERROR'};
+              callback(error, null);
+            } else {
+              callback(null, newIndex);
+            }
+          }
+        }
+      });
+    }
+  });    
 }
 
 function constructSql(currency, category, language, pageIndex, pageSize) {
@@ -152,6 +202,61 @@ var server = jayson.server({
         results.data = [];
         callback(null, results);
       }      
+    }
+  },
+
+  updateIndex: function(args, callback) {
+    var uuid = args.uuid;
+    var indexName = args.indexName;
+    var direction = args.direction;
+    log.info(args);
+    if (!checkUpdateParameters(uuid, indexName, direction)) {
+      var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
+      callback(error, null);
+    } else {
+      var newIndex = -1;
+      getNewIndex(uuid, indexName, direction, function (queryErr, indexResult) {
+        if(queryErr) {
+          callback(queryErr, null);
+        } else {
+          newIndex = indexResult;
+          console.log("newIndex = " + newIndex);
+          if (newIndex < 0) {
+            log.error("INDEX_CACULATE_ERROR uuid = " + uuid + ", indexName = " + indexName);
+            var error = {code: ErrorCode.INDEX_CACULATE_ERROR, message: 'INDEX_CACULATE_ERROR'};
+            callback(error, null);
+          } else {
+            var sql = 'update cn_info set ' + indexName + ' = ' + newIndex + ', update_time = now() where uuid = "' + uuid + '"';
+            log.info(sql);
+            if (sql != "") {
+              pool.getConnection(function(connetErr, connection) {
+                if (connetErr) {
+                  var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_CONNECT_ERROR'};
+                  callback(error, null);
+                } else {
+                  // Use the connection
+                  connection.query(sql, function (updateErr, result) {
+                    // When done with the connection, release it.
+                    connection.release();
+                    if (updateErr) {
+                      var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_UPDATE_ERROR'};
+                      callback(error, null);
+                    } else {
+                      console.log(result);
+                      var response = new IndexResponse();
+                      response.bullIndex = newIndex;
+                      callback(null, response);
+                    }
+                  });
+                }
+              });
+            } else {
+              var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
+              callback(error, null);
+            }  
+          }
+        }
+      });          
     }
   }
 });
