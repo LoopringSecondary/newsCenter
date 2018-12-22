@@ -36,6 +36,8 @@ var NewsItem = module.exports.NewsItem = function(args) {
   this.bullIndex = null;
   this.bearIndex = null;
   this.forwardNum = null;
+  this.language = null;
+  this.currency = null;
   if (args) {
     if (args.uuid !== undefined && args.uuid !== null) {
       this.uuid = args.uuid;
@@ -72,6 +74,12 @@ var NewsItem = module.exports.NewsItem = function(args) {
     }
     if (args.forwardNum !== undefined && args.forwardNum !== null) {
       this.forwardNum = args.forwardNum;
+    }
+    if (args.language !== undefined && args.language !== null) {
+      this.language = args.language;
+    }
+    if (args.currency !== undefined && args.currency !== null) {
+      this.currency = args.currency;
     }
   }
 };
@@ -173,6 +181,20 @@ NewsItem.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 13:
+      if (ftype == Thrift.Type.STRING) {
+        this.language = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 14:
+      if (ftype == Thrift.Type.STRING) {
+        this.currency = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -242,6 +264,16 @@ NewsItem.prototype.write = function(output) {
   if (this.forwardNum !== null && this.forwardNum !== undefined) {
     output.writeFieldBegin('forwardNum', Thrift.Type.I64, 12);
     output.writeI64(this.forwardNum);
+    output.writeFieldEnd();
+  }
+  if (this.language !== null && this.language !== undefined) {
+    output.writeFieldBegin('language', Thrift.Type.STRING, 13);
+    output.writeString(this.language);
+    output.writeFieldEnd();
+  }
+  if (this.currency !== null && this.currency !== undefined) {
+    output.writeFieldBegin('currency', Thrift.Type.STRING, 14);
+    output.writeString(this.currency);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

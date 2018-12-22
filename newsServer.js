@@ -73,7 +73,7 @@ function checkUpdateParameters(uuid, indexName, direction) {
   return true;
 }
 
-function constructRespose(queryResult, category, pageIndex, pageSize) {
+function constructRespose(queryResult, category, currency, language, pageIndex, pageSize) {
   var results = new NewsCollection();            
   results.data = [];
   var item = new NewsItem();
@@ -95,6 +95,8 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
     item.bullIndex = queryResult[i].bull_index;
     item.bearIndex = queryResult[i].bear_index;
     item.forwardNum = queryResult[i].forward_num;
+    item.language = queryResult[i].language;
+    item.currency = currency;
     results.data.push(item);
   }
   results.pageIndex = pageIndex;
@@ -196,7 +198,7 @@ var server = jayson.server({
                 var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_QUERY_ERROR'};
                 callback(error, null);
               } else {
-                var results = constructRespose(queryResult, category, pageIndex, pageSize);
+                var results = constructRespose(queryResult, category, currency, language, pageIndex, pageSize);
                 callback(null, results);
               }
             });
