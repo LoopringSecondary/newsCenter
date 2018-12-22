@@ -5,10 +5,13 @@ var log4js         = require('log4js');
 var DataTypes      = require('./gen-nodejs/data_types'),
     ErrorCode      = DataTypes.ErrorCode,
     NewsItem       = DataTypes.NewsItem,
-    Language       = DataTypes.Language,
-    Category       = DataTypes.Category,
     NewsCollection = DataTypes.NewsCollection,
-    IndexResponse  = DataTypes.IndexResponse;
+    IndexResponse  = DataTypes.IndexResponse,
+    S_CHINESE      = DataTypes.S_CHINESE,
+    T_CHINENE      = DataTypes.T_CHINENE,
+    ENGLISH        = DataTypes.ENGLISH,
+    INFORMATION    = DataTypes.INFORMATION,
+    FLASH          = DataTypes.FLASH;
 
 /**
  * make a log directory, just in case it isn't there.
@@ -43,10 +46,12 @@ function isNonNegativeInt(input) {
 }
 
 function checkQueryParameters(currency, category, language, pageIndex, pageSize) {
-  if(category != Category.INFORMATION && category != Category.FLASH) {
+  if(category != INFORMATION && category != FLASH) {
+    console.log("category");
     return false;
   }
-  if(language != Language.CHINESE && language != Language.ENGLISH) {
+  if(language != S_CHINESE && language != T_CHINENE && language != ENGLISH) {
+    console.log("language");
     return false;
   }
   if(!isNonNegativeInt(pageIndex) || !isNonNegativeInt(pageSize) || pageSize > 10) {
@@ -94,6 +99,7 @@ function constructRespose(queryResult, category, pageIndex, pageSize) {
   }
   results.pageIndex = pageIndex;
   results.pageSize = pageSize;
+  results.total = 10; //TODO 增加一次读库
   log.info("respose: " + results.data.length + " records");
   return results;
 }
@@ -139,24 +145,22 @@ function constructSql(currency, category, language, pageIndex, pageSize) {
   var tableName = "";
 
   switch(language) {
-    case 0:
+    case S_CHINESE:
       tableName = "cn_info";
       break;
-    case 1:
+    case ENGLISH:
       // TODO: support English
       return sqlStr;
     default:
       return sqlStr;
   }
 
-  var news_category = searchCategoryName(category);
-
   switch(currency) {
     case "ALL_CURRENCY":
-      sqlStr = 'select * from ' + tableName + ' where news_category = "' + news_category + '" order by insert_time DESC limit ' + pageIndex + ',' + pageSize;
+      sqlStr = 'select * from ' + tableName + ' where news_category = "' + category + '" order by insert_time DESC limit ' + pageIndex + ',' + pageSize;
       break;
     default:
-      sqlStr = 'select * from ' + tableName + ' where news_category = "' + news_category + '" and title like "%' + currency + '%"  order by insert_time DESC limit ' + pageIndex + ',' + pageSize;
+      sqlStr = 'select * from ' + tableName + ' where news_category = "' + category + '" and title like "%' + currency + '%"  order by insert_time DESC limit ' + pageIndex + ',' + pageSize;
       break;
   }
   return sqlStr;

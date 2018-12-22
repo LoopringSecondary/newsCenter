@@ -20,15 +20,8 @@ ttypes.ErrorCode = {
 ttypes.Currency = {
   'ALL_CURRENCY' : 0,
   'BTC' : 1,
-  'ETH' : 2
-};
-ttypes.Category = {
-  'INFORMATION' : 0,
-  'FLASH' : 1
-};
-ttypes.Language = {
-  'CHINESE' : 0,
-  'ENGLISH' : 1
+  'ETH' : 2,
+  'LRC' : 3
 };
 var NewsItem = module.exports.NewsItem = function(args) {
   this.uuid = null;
@@ -260,6 +253,7 @@ var NewsCollection = module.exports.NewsCollection = function(args) {
   this.data = null;
   this.pageIndex = null;
   this.pageSize = null;
+  this.total = null;
   if (args) {
     if (args.data !== undefined && args.data !== null) {
       this.data = Thrift.copyList(args.data, [ttypes.NewsItem]);
@@ -269,6 +263,9 @@ var NewsCollection = module.exports.NewsCollection = function(args) {
     }
     if (args.pageSize !== undefined && args.pageSize !== null) {
       this.pageSize = args.pageSize;
+    }
+    if (args.total !== undefined && args.total !== null) {
+      this.total = args.total;
     }
   }
 };
@@ -321,6 +318,13 @@ NewsCollection.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 4:
+      if (ftype == Thrift.Type.I64) {
+        this.total = input.readI64();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -354,6 +358,11 @@ NewsCollection.prototype.write = function(output) {
   if (this.pageSize !== null && this.pageSize !== undefined) {
     output.writeFieldBegin('pageSize', Thrift.Type.I64, 3);
     output.writeI64(this.pageSize);
+    output.writeFieldEnd();
+  }
+  if (this.total !== null && this.total !== undefined) {
+    output.writeFieldBegin('total', Thrift.Type.I64, 4);
+    output.writeI64(this.total);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -459,3 +468,8 @@ IndexResponse.prototype.write = function(output) {
   return;
 };
 
+ttypes.INFORMATION = 'information';
+ttypes.FLASH = 'flash';
+ttypes.S_CHINESE = 'zh-Hans';
+ttypes.T_CHINENE = 'zh-Hant';
+ttypes.ENGLISH = 'en';
