@@ -169,12 +169,13 @@ function constructSql(currency, category, language, pageIndex, pageSize) {
 // create a server
 var server = jayson.server({
   queryNews: function(args, callback) {
-    var currency = args.currency;
-    var category = args.category;
-    var language = args.language;
-    var pageIndex = args.pageIndex;
-    var pageSize = args.pageSize;
-    log.info(args);
+    var arg = args[0];
+    var currency = arg.currency;
+    var category = arg.category;
+    var language = arg.language;
+    var pageIndex = arg.pageIndex;
+    var pageSize = arg.pageSize;
+    log.info(arg);
     if(!checkQueryParameters(currency, category, language, pageIndex, pageSize)) {
       var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
       callback(error, null);
@@ -210,9 +211,10 @@ var server = jayson.server({
   },
 
   updateIndex: function(args, callback) {
-    var uuid = args.uuid;
-    var indexName = args.indexName;
-    var direction = args.direction;
+    var arg = args[0];
+    var uuid = arg.uuid;
+    var indexName = arg.indexName;
+    var direction = arg.direction;
     log.info(args);
     if (!checkUpdateParameters(uuid, indexName, direction)) {
       var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
