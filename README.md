@@ -11,7 +11,7 @@
 
 ### query news
 ```
-curl 127.0.0.1:3000 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"queryNews","currency":"LRC","language":0,"category":0,"pageIndex":0,"pageSize":5},"id":64}'
+curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"queryNews","params":[{"currency":"LRC","language":"zh-Hans","category":"information","pageIndex":0,"pageSize":1}],"id":64}'
 ```
 Normal respose
 ```
@@ -48,7 +48,7 @@ Abnormal response
 
 ### update index
 ```
-curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"updateIndex","params":{"uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU=","indexName":"bull_index", "direction":1},"id":64}'
+curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"updateIndex","params":{"uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU","indexName":"bull_index", "direction":1},"id":64}'
 ```
 Normal response
 ```
