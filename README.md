@@ -48,7 +48,7 @@ Abnormal response
 
 ### update index
 ```
-curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"updateIndex","params":{"uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU","indexName":"bull_index", "direction":1},"id":64}'
+curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"updateIndex","params":[{"uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU","indexName":"bull_index", "direction":1}],"id":64}'
 ```
 Normal response
 ```
