@@ -73,7 +73,7 @@ function checkUpdateParameters(uuid, indexName, direction) {
   return true;
 }
 
-function constructRespose(queryResult, category, currency, language, pageIndex, pageSize) {
+function constructRespose(queryResult, category, currency, language, pageIndex, pageSize, total) {
   var results = new NewsCollection();            
   results.data = [];
   var item = new NewsItem();
@@ -101,7 +101,7 @@ function constructRespose(queryResult, category, currency, language, pageIndex, 
   }
   results.pageIndex = pageIndex;
   results.pageSize = pageSize;
-  results.total = 10; //TODO 增加一次读库
+  results.total = total; //TODO 增加一次读库，如果APP显示方式优化，此处及查库过程可以删除
   log.info("respose: " + results.data.length + " records");
   return results;
 }
@@ -187,7 +187,7 @@ var server = Jayson.server({
       return callback(error, null);
     } else {
       var queryNewsSql = constructSql(currency, category, language, pageIndex, pageSize);
-      var queryTotalSql = 'select count(*) as total from cn_info where title like "%LRC%"';
+      var queryTotalSql = 'select count(*) as total from cn_info where title like "%' + currency + '%"';
       log.info(queryNewsSql);
       if (queryNewsSql != "") {
         pool.getConnection(function(connetErr, connection) {
@@ -205,14 +205,9 @@ var server = Jayson.server({
                   log.error(err);
                   callback(err);
                 } else {
-                  var totalNum = result[0];
-                  console.log(totalNum);
-                  console.log(totalNum[0]);
-                  var temp = totalNum[0];
-                  console.log(temp[0].total);
+                  var total = result[0][0][0].total;
                   var queryResult = result[1][0];
-                  console.log(queryResult);
-                  var results = constructRespose(queryResult, category, currency, language, pageIndex, pageSize);
+                  var results = constructRespose(queryResult, category, currency, language, pageIndex, pageSize, total);
                   callback(null, results);
                 }
               });
