@@ -12,6 +12,7 @@ enum ErrorCode {
     DATABASE_CONNECT_ERROR   = 10002
     DATABASE_QUERY_ERROR     = 10002
     INDEX_CACULATE_ERROR     = 10003
+    BUSINESS_ERROR           = 10004
 }
 
 ///////////////////////////////////////////////////////////////////////

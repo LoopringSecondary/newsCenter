@@ -1,7 +1,8 @@
-var jayson         = require('jayson');
-var mysql          = require('mysql');
-var moment         = require('moment');
-var log4js         = require('log4js');
+var Jayson         = require('jayson');
+var Mysql          = require('mysql');
+var Async          = require('async');
+var Moment         = require('moment');
+var Log4js         = require('log4js');
 var DataTypes      = require('./gen-nodejs/data_types'),
     ErrorCode      = DataTypes.ErrorCode,
     NewsItem       = DataTypes.NewsItem,
@@ -25,10 +26,10 @@ try {
   }
 }
 
-log4js.configure('./config/log4js.json');
-var log = log4js.getLogger("newscenter");
+Log4js.configure('./config/log4js.json');
+var log = Log4js.getLogger("newscenter");
 
-var pool  = mysql.createPool({
+var pool  = Mysql.createPool({
   connectionLimit : 10,
   host            : 'localhost',
   user            : 'root',
@@ -47,7 +48,6 @@ function isNonNegativeInt(input) {
 
 function checkQueryParameters(currency, category, language, pageIndex, pageSize) {
   if(category != INFORMATION && category != FLASH) {
-    console.log("category");
     return false;
   }
   if(language != S_CHINESE && language != T_CHINENE && language != ENGLISH) {
@@ -88,7 +88,7 @@ function constructRespose(queryResult, category, currency, language, pageIndex, 
     item.category = category;
     item.url = queryResult[i].url;
     var insertTime = (new Date(queryResult[i].insert_time)).getTime();
-    item.publishTime = moment.unix(insertTime/1000).utc().format("YYYY-MM-DD HH:mm");
+    item.publishTime = Moment.unix(insertTime/1000).utc().format("YYYY-MM-DD HH:mm");
     item.source = queryResult[i].source_site_name;
     item.author = queryResult[i].author;
     item.imageUrl = queryResult[i].imageUrl;
@@ -114,7 +114,7 @@ function getNewIndex (uuid, indexName, direction, callback) {
       callback(error, null);
     } else {
       // Use the connection
-      connection.query(sql, function (selectErr, queryResult, fields) {
+      connection.query(sql, function (selectErr, queryResult) {
         // When done with the connection, release it.
         connection.release();
         if (selectErr) {
@@ -123,14 +123,14 @@ function getNewIndex (uuid, indexName, direction, callback) {
         } else {
           console.log(queryResult);
           if(queryResult.length != 1) {
-            var error = {code: ErrorCode.DATA_ERROR, message: 'DATA_ERROR'};
+            var error = {code: ErrorCode.BUSINESS_ERROR, message: 'BUSINESS_ERROR'};
             callback(error, null);
           } else {
             console.log("queryResult[0].bull_index = " + eval("queryResult[0]." + indexName))
             var newIndex = eval("queryResult[0]." + indexName) + direction;
-            console.log(newIndex);
             if (newIndex < 0) {
-              var error = {code: ErrorCode.DATA_ERROR, message: 'DATA_ERROR'};
+              var error = {code: ErrorCode.BUSINESS_ERROR, message: 'BUSINESS_ERROR'};
+              console.log("newIndex < 0");
               callback(error, null);
             } else {
               callback(null, newIndex);
@@ -169,8 +169,68 @@ function constructSql(currency, category, language, pageIndex, pageSize) {
 }
 
 // create a server
-var server = jayson.server({
+var server = Jayson.server({
+  queryAsync: function(args, callback) {
+    if(args.length != 1) {
+      var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
+      return callback(error, null);
+    }
+    var arg = args[0];
+    var currency = arg.currency;
+    var category = arg.category;
+    var language = arg.language;
+    var pageIndex = arg.pageIndex;
+    var pageSize = arg.pageSize;
+    log.info(arg);
+    if(!checkQueryParameters(currency, category, language, pageIndex, pageSize)) {
+      var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
+      return callback(error, null);
+    } else {
+      var queryNewsSql = constructSql(currency, category, language, pageIndex, pageSize);
+      var queryTotalSql = 'select count(*) as total from cn_info where title like "%LRC%"';
+      log.info(queryNewsSql);
+      if (queryNewsSql != "") {
+        pool.getConnection(function(connetErr, connection) {
+          if (connetErr) {
+            var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_CONNECT_ERROR'};
+            callback(error, null);
+          } else {
+            Async.parallel ([
+              function (cb) {connection.query(queryTotalSql, cb)},
+              function (cb) {connection.query(queryNewsSql, cb)}
+              ], function(err, result) {
+                // When done with the connection, release it.
+                connection.release();
+                if (err) {
+                  log.error(err);
+                  callback(err);
+                } else {
+                  var totalNum = result[0];
+                  console.log(totalNum);
+                  console.log(totalNum[0]);
+                  var temp = totalNum[0];
+                  console.log(temp[0].total);
+                  var queryResult = result[1][0];
+                  console.log(queryResult);
+                  var results = constructRespose(queryResult, category, currency, language, pageIndex, pageSize);
+                  callback(null, results);
+                }
+              });
+          }
+        });
+      } else {
+        var results = new NewsCollection();            
+        results.data = [];
+        callback(null, results);
+      }      
+    }
+  },
+
   queryNews: function(args, callback) {
+    if(args.length != 1) {
+      var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
+      return callback(error, null);
+    }
     var arg = args[0];
     var currency = arg.currency;
     var category = arg.category;
@@ -191,7 +251,7 @@ var server = jayson.server({
             callback(error, null);
           } else {
             // Use the connection
-            connection.query(sql, function (queryErr, queryResult, fields) {
+            connection.query(sql, function (queryErr, queryResult) {
               // When done with the connection, release it.
               connection.release();
               if (queryErr) {
@@ -213,6 +273,10 @@ var server = jayson.server({
   },
 
   updateIndex: function(args, callback) {
+    if(args.length != 1) {
+      var error = {code: ErrorCode.PARAMETER_ERROR, message: 'PARAMETER_ERROR'};
+      return callback(error, null);
+    }
     var arg = args[0];
     var uuid = arg.uuid;
     var indexName = arg.indexName;
@@ -225,6 +289,7 @@ var server = jayson.server({
       var newIndex = -1;
       getNewIndex(uuid, indexName, direction, function (queryErr, indexResult) {
         if(queryErr) {
+          console.log(queryErr);
           callback(queryErr, null);
         } else {
           newIndex = indexResult;
@@ -244,17 +309,35 @@ var server = jayson.server({
                 } else {
                   // Use the connection
                   connection.query(sql, function (updateErr, result) {
-                    // When done with the connection, release it.
-                    connection.release();
                     if (updateErr) {
+                      // When done with the connection, release it.
+                      connection.release();
                       var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_UPDATE_ERROR'};
                       callback(error, null);
                     } else {
-                      console.log(result);
-                      var response = new IndexResponse();
-                      response.uuid = uuid;
-                      response.bullIndex = newIndex;
-                      callback(null, response);
+                      // Use the connection
+                      var sqlAfter = 'select * from cn_info where uuid = "' + uuid + '"';
+                      connection.query(sqlAfter, function (queryAfterErr, resultAfter, fields) {
+                        // When done with the connection, release it.
+                        connection.release();
+                        if (queryAfterErr) {
+                          var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_UPDATE_ERROR'};
+                          callback(error, null);
+                        } else {
+                          console.log(resultAfter);
+                          if(resultAfter.length != 1) {
+                            var error = {code: ErrorCode.BUSINESS_ERROR, message: 'BUSINESS_ERROR'};
+                            callback(error, null);
+                          } else {
+                            var response = new IndexResponse();
+                            response.uuid = uuid;
+                            response.bullIndex = resultAfter[0].bull_index;
+                            response.bearIndex = resultAfter[0].bear_index;
+                            response.forwardNum = resultAfter[0].forward_num;
+                            callback(null, response);
+                          }
+                        };
+                      });
                     }
                   });
                 }
@@ -269,22 +352,6 @@ var server = jayson.server({
     }
   }
 });
-
-function searchLanguageName(myValue) {
-  for (prop in Language) {
-    if (Language[prop] == myValue) {
-      return prop;
-    }
-  }
-}
-
-function searchCategoryName(myValue) {
-  for (prop in Category) {
-    if (Category[prop] == myValue) {
-      return prop;
-    }
-  }
-}
 
 server.http().listen(5555, function() {
   log.info('News center sever is istening on: 5555:)');
