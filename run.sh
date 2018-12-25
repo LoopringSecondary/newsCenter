@@ -5,4 +5,4 @@
 
 thrift --gen js:node -o ./ proto/data.thrift
 
-nohup node newsServer.js &
+nohup node ./src/loopring/news/newsServer.js &

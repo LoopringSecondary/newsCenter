@@ -6,12 +6,6 @@
         "pattern": "-yyyy-MM-dd",
         "category": "http"
       },
-      "app": {
-        "type": "file",
-        "filename": "log/app.log",
-        "maxLogSize": 100000000,
-        "numBackups": 1
-      },
       "errorFile": {
         "type": "file",
         "filename": "log/errors.log"

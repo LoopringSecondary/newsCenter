@@ -503,6 +503,10 @@ IndexResponse.prototype.write = function(output) {
 
 ttypes.INFORMATION = 'information';
 ttypes.FLASH = 'flash';
+ttypes.BULL_INDEX_COLUMN = 'bull_index';
+ttypes.BEAR_INDEX_COLUMN = 'bear_index';
+ttypes.FORWARD_NUM_COLUMN = 'forward_num';
 ttypes.S_CHINESE = 'zh-Hans';
 ttypes.T_CHINENE = 'zh-Hant';
 ttypes.ENGLISH = 'en';
+ttypes.MAX_PAGE_SIZE = 100;
