@@ -60,18 +60,21 @@ exports.checkUpdateIndexParms = function(requests) {
 
 exports.constructQueryNewsSql = function(request) {
   var queryNewsSql = "";
+  var queryTotalSql = "";
   const tableName = "cn_info";
   const orderCondition = " order by insert_time DESC limit ";
 
   switch(request.currency) {
     case "ALL_CURRENCY":
-      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + orderCondition + request.pageIndex + ',' + request.pageSize;
+      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '"' + orderCondition + request.pageIndex + ',' + request.pageSize;
+      queryTotalSql = 'select count(*) as total from cn_info';
       break;
     default:
       queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and title like "%' + request.currency + '%"' + orderCondition + request.pageIndex + ',' + request.pageSize;
+      queryTotalSql = 'select count(*) as total from cn_info where title like "%' + request.currency + '%"';
       break;
   }
-  var queryTotalSql = 'select count(*) as total from cn_info where title like "%' + request.currency + '%"';
+
 
   var sql = {queryNewsSql: queryNewsSql, queryTotalSql: queryTotalSql};
   log.info(sql);
