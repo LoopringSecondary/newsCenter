@@ -24,6 +24,7 @@ Normal respose
             {
             "uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU="
             "title":"文章2",
+            "abstract":"摘要",
             "content":"文章2正文",
             "currency":"LRC",
             "category":0
@@ -60,6 +61,42 @@ Normal response
     "bullIndex":4,
     "bearIndex":0,
     "forwardNum":0
+    }
+}
+```
+Abnormal response
+```
+{"jsonrpc":"2.0","id":64,"error":{"code":-32603,"message":"Internal error"}}
+```
+
+### query scrolling information
+```
+curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"queryScrollingInfo","params":[],"id":64}'
+```
+Normal response
+```
+{
+"jsonrpc":"2.0",
+"id":64,
+"result":
+    {"data":
+        [
+            {
+            "uuid":""
+            "title":"路印协议携手普华永道支持香港区块链加速器Loopnest",
+            "abstract":"",
+            "content":"",
+            "currency":"LRC",
+            "category":0
+            “url”:"https://blogs.loopring.org/loopring-loopnest/",
+            "publishTime":"",
+            "source":"",
+            "author":"",
+            "imageUrl":"https://blogs.loopring.org/content/images/2018/11/loo.jpeg",
+            "bullIndex":0,
+            "bearIndex":0,
+            "forwardNum":0}
+        ]
     }
 }
 ```
