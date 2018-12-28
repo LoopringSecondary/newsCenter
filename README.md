@@ -27,7 +27,7 @@ Normal respose
             "abstract":"摘要",
             "content":"文章2正文",
             "currency":"LRC",
-            "category":0
+            "category":"information"
             “url”:"",
             "publishTime":"",
             "source":"",
@@ -87,7 +87,7 @@ Normal response
             "abstract":"",
             "content":"",
             "currency":"",
-            "category":0
+            "category":"",
             “url”:"https://blogs.loopring.org/loopring-loopnest/",
             "publishTime":"",
             "source":"",
