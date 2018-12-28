@@ -86,7 +86,7 @@ Normal response
             "title":"路印协议携手普华永道支持香港区块链加速器Loopnest",
             "abstract":"",
             "content":"",
-            "currency":"LRC",
+            "currency":"",
             "category":0
             “url”:"https://blogs.loopring.org/loopring-loopnest/",
             "publishTime":"",
