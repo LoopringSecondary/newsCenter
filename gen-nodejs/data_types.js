@@ -16,7 +16,8 @@ ttypes.ErrorCode = {
   'DATABASE_CONNECT_ERROR' : 10002,
   'DATABASE_QUERY_ERROR' : 10002,
   'INDEX_CACULATE_ERROR' : 10003,
-  'BUSINESS_ERROR' : 10004
+  'BUSINESS_ERROR' : 10004,
+  'NOT_SUPPORT_LANGUAGE' : 10005
 };
 ttypes.Currency = {
   'ALL_CURRENCY' : 0,
@@ -501,6 +502,8 @@ IndexResponse.prototype.write = function(output) {
   return;
 };
 
+ttypes.NEWS_INFO = 'news_info';
+ttypes.ALL_CURRENCY = 'ALL_CURRENCY';
 ttypes.INFORMATION = 'information';
 ttypes.FLASH = 'flash';
 ttypes.BULL_INDEX_COLUMN = 'bull_index';

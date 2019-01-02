@@ -15,7 +15,9 @@ var DataTypes            = require('../../../gen-nodejs/data_types'),
     MAX_PAGE_SIZE        = DataTypes.MAX_PAGE_SIZE,
     BULL_INDEX_COLUMN    = DataTypes.BULL_INDEX_COLUMN,
     BEAR_INDEX_COLUMN    = DataTypes.BEAR_INDEX_COLUMN,
-    FORWARD_NUM_COLUMN   = DataTypes.FORWARD_NUM_COLUMN;
+    FORWARD_NUM_COLUMN   = DataTypes.FORWARD_NUM_COLUMN,
+    NEWS_INFO            = DataTypes.NEWS_INFO,
+    ALL_CURRENCY         = DataTypes.ALL_CURRENCY;
 
 Log4js.configure('./config/log4js.json');
 var log = Log4js.getLogger("util");
@@ -61,17 +63,17 @@ exports.checkUpdateIndexParms = function(requests) {
 exports.constructQueryNewsSql = function(request) {
   var queryNewsSql = "";
   var queryTotalSql = "";
-  const tableName = "cn_info";
+  const tableName = NEWS_INFO;
   const orderCondition = " order by insert_time DESC limit ";
 
   switch(request.currency) {
-    case "ALL_CURRENCY":
-      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
-      queryTotalSql = 'select count(*) as total from cn_info';
+    case ALL_CURRENCY:
+      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and language = "' + request.language + '"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
+      queryTotalSql = 'select count(*) as total from ' + tableName;
       break;
     default:
-      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and title like "%' + request.currency + '%"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
-      queryTotalSql = 'select count(*) as total from cn_info where title like "%' + request.currency + '%"';
+      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and language = "' + request.language + '" and title like "%' + request.currency + '%"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
+      queryTotalSql = 'select count(*) as total from ' + tableName + ' where title like "%' + request.currency + '%"';
       break;
   }
 
@@ -131,7 +133,8 @@ exports.waterFallStart = function(parms) {
 }
 
 exports.getNewIndex = function(request, callback) {
-  var sql = 'select * from cn_info where uuid = "' + request.uuid + '"';
+  const tableName = NEWS_INFO;
+  var sql = 'select * from ' + tableName + ' where uuid = "' + request.uuid + '"';
   // Use the connection
   var connection = request.connection;
   connection.query(sql, function (queryErr, queryResult) {
@@ -171,7 +174,8 @@ exports.getNewIndex = function(request, callback) {
 }
 
 exports.updateIndex = function(request, callback) {
-  var sql = 'update cn_info set bull_index = ' + request.bullIndex + ', bear_index = ' + request.bearIndex + ', forward_num = ' + request.forwardNum + ', update_time = now() where uuid = "' + request.uuid + '"';
+  const tableName = NEWS_INFO;
+  var sql = 'update ' + tableName + ' set bull_index = ' + request.bullIndex + ', bear_index = ' + request.bearIndex + ', forward_num = ' + request.forwardNum + ', update_time = now() where uuid = "' + request.uuid + '"';
   log.info(sql);
   request.connection.query(sql, function (queryErr, queryResult) {
     if(queryErr) {
@@ -186,8 +190,10 @@ exports.updateIndex = function(request, callback) {
 }
 
 exports.queryScrollingInfo = function(request, callback) {
-  const orderCondition = " order by insert_time DESC limit ";
-  var sql = 'select * from cn_info where url like "https://blogs.loopring.org/%" order by insert_time DESC limit 5';
+  const tableName = NEWS_INFO;
+  const orderCondition = " order by insert_time DESC limit 5";
+  var sql = 'select * from ' + tableName + ' where url like "https://blogs.loopring.org/%"' + orderCondition;
+  log.info(sql);
   request.connection.query(sql, function (queryErr, queryResult) {
     if(queryErr) {
       log.error(queryErr);
@@ -206,12 +212,12 @@ exports.constructScrollingInfoRespose = function(queryResult) {
   console.log(queryResult);
   for (var i = 0; i < queryResult.length; i++) {
     var item = new NewsItem();
-    if (queryResult[i].title == null || queryResult[i].source_url == null) {
+    if (queryResult[i].title == null || queryResult[i].image_url == null) {
       continue;
     }
 
     item.title = queryResult[i].title;
-    item.imageUrl = queryResult[i].source_url;
+    item.imageUrl = queryResult[i].image_url;
     item.url = queryResult[i].url;
     log.info(queryResult[i].uuid);
     results.data.push(item);

@@ -29,6 +29,7 @@ var pool  = Mysql.createPool({
   password        : '111111',
   database        : 'crawler',
   charset         : 'utf8',
+  acquireTimeout  : 5000,
 });
 
 // create a server
