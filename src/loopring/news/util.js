@@ -66,11 +66,11 @@ exports.constructQueryNewsSql = function(request) {
 
   switch(request.currency) {
     case "ALL_CURRENCY":
-      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '"' + orderCondition + request.pageIndex + ',' + request.pageSize;
+      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
       queryTotalSql = 'select count(*) as total from cn_info';
       break;
     default:
-      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and title like "%' + request.currency + '%"' + orderCondition + request.pageIndex + ',' + request.pageSize;
+      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and title like "%' + request.currency + '%"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
       queryTotalSql = 'select count(*) as total from cn_info where title like "%' + request.currency + '%"';
       break;
   }
@@ -105,6 +105,7 @@ exports.constructNewsRespose = function(request, queryResult, total) {
     item.forwardNum = queryResult[i].forward_num;
     item.language = queryResult[i].language;
     item.currency = request.currency;
+    log.info(item.uuid);
     results.data.push(item);
   }
   results.pageIndex = request.pageIndex;
@@ -184,9 +185,39 @@ exports.updateIndex = function(request, callback) {
   });
 }
 
+exports.queryScrollingInfo = function(request, callback) {
+  const orderCondition = " order by insert_time DESC limit ";
+  var sql = 'select * from cn_info where url like "https://blogs.loopring.org/%" order by insert_time DESC limit 5';
+  request.connection.query(sql, function (queryErr, queryResult) {
+    if(queryErr) {
+      log.error(queryErr);
+      var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_SELECT_ERROR'};
+      return callback(error, null);
+    } else {
+      return callback(null, queryResult);
+    }
+  });
+}
 
+exports.constructScrollingInfoRespose = function(queryResult) {
+  var results = new NewsCollection();            
+  results.data = [];
+  var item = new NewsItem();
+  console.log(queryResult);
+  for (var i = 0; i < queryResult.length; i++) {
+    var item = new NewsItem();
+    if (queryResult[i].title == null || queryResult[i].source_url == null) {
+      continue;
+    }
 
-
+    item.title = queryResult[i].title;
+    item.imageUrl = queryResult[i].source_url;
+    item.url = queryResult[i].url;
+    log.info(queryResult[i].uuid);
+    results.data.push(item);
+  }
+  return results;
+}
 
 
 

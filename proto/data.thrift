@@ -13,6 +13,7 @@ enum ErrorCode {
     DATABASE_QUERY_ERROR     = 10002
     INDEX_CACULATE_ERROR     = 10003
     BUSINESS_ERROR           = 10004
+    NOT_SUPPORT_LANGUAGE     = 10005
 }
 
 ///////////////////////////////////////////////////////////////////////

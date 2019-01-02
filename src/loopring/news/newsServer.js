@@ -94,6 +94,31 @@ var server = Jayson.server({
           callback(null, response);
         });
     });         
+  },
+
+  queryScrollingInfo: function(requests, callback) {
+    log.info("query scrolling information begin...");
+
+    pool.getConnection(function(connetErr, connection) {
+      if (connetErr) {
+        var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_CONNECT_ERROR'};
+        log.error(error);
+        return callback(error, null);
+      }
+      var parms = {connection: connection};
+      Async.waterfall([
+        Util.waterFallStart(parms),
+        Util.queryScrollingInfo
+        ], function (error, result) {
+          connection.release();
+          if (error) { 
+            log.error(error);
+            return callback(error, null);
+          }
+          var response = Util.constructScrollingInfoRespose(result);
+          callback(null, response);
+        });
+    });         
   }
 });
 
