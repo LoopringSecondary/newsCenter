@@ -64,16 +64,16 @@ exports.constructQueryNewsSql = function(request) {
   var queryNewsSql = "";
   var queryTotalSql = "";
   const tableName = NEWS_INFO;
-  const orderCondition = " order by insert_time DESC limit ";
+  const orderCondition = " order by publish_time_str DESC limit ";
 
   switch(request.currency) {
     case ALL_CURRENCY:
       queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and language = "' + request.language + '"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
-      queryTotalSql = 'select count(*) as total from ' + tableName;
+      queryTotalSql = 'select count(*) as total from ' + tableName + ' where news_category = "' + request.category + '" and language = "' + request.language + '"';
       break;
     default:
-      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and language = "' + request.language + '" and title like "%' + request.currency + '%"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
-      queryTotalSql = 'select count(*) as total from ' + tableName + ' where title like "%' + request.currency + '%"';
+      queryNewsSql = 'select * from ' + tableName + ' where news_category = "' + request.category + '" and language = "' + request.language + '" and tags like "%' + request.currency + '%"' + orderCondition + request.pageIndex*request.pageSize + ',' + request.pageSize;
+      queryTotalSql = 'select count(*) as total from ' + tableName + ' where news_category = "' + request.category + '" and language = "' + request.language + '" and tags like "%' + request.currency + '%"';
       break;
   }
 
@@ -97,8 +97,9 @@ exports.constructNewsRespose = function(request, queryResult, total) {
     item.content = queryResult[i].content;
     item.category = queryResult[i].category;
     item.url = queryResult[i].url;
-    var insertTime = (new Date(queryResult[i].insert_time)).getTime();
-    item.publishTime = Moment.unix(insertTime/1000).utc().format("YYYY-MM-DD HH:mm");
+    //var insertTime = (new Date(queryResult[i].insert_time)).getTime();
+    //item.publishTime = Moment.unix(insertTime/1000).utc().format("YYYY-MM-DD HH:mm");
+    item.publishTime = queryResult[i].publish_time_str;
     item.source = queryResult[i].source_site_name;
     item.author = queryResult[i].author;
     item.imageUrl = queryResult[i].imageUrl;
@@ -107,7 +108,7 @@ exports.constructNewsRespose = function(request, queryResult, total) {
     item.forwardNum = queryResult[i].forward_num;
     item.language = queryResult[i].language;
     item.currency = request.currency;
-    log.info(item.uuid);
+    log.info(item.uuid + ', ' + item.title);
     results.data.push(item);
   }
   results.pageIndex = request.pageIndex;
@@ -134,7 +135,7 @@ exports.waterFallStart = function(parms) {
 
 exports.getNewIndex = function(request, callback) {
   const tableName = NEWS_INFO;
-  var sql = 'select * from ' + tableName + ' where uuid = "' + request.uuid + '"';
+  var sql = 'select bull_index,bear_index,forward_num from ' + tableName + ' where uuid = "' + request.uuid + '"';
   // Use the connection
   var connection = request.connection;
   connection.query(sql, function (queryErr, queryResult) {
@@ -191,8 +192,8 @@ exports.updateIndex = function(request, callback) {
 
 exports.queryScrollingInfo = function(request, callback) {
   const tableName = NEWS_INFO;
-  const orderCondition = " order by insert_time DESC limit 5";
-  var sql = 'select * from ' + tableName + ' where url like "https://blogs.loopring.org/%"' + orderCondition;
+  const orderCondition = " order by publish_time_str DESC limit 5";
+  var sql = 'select uuid,title,url,image_url from ' + tableName + ' where url like "https://blogs.loopring.org/%"' + orderCondition;
   log.info(sql);
   request.connection.query(sql, function (queryErr, queryResult) {
     if(queryErr) {
@@ -217,8 +218,8 @@ exports.constructScrollingInfoRespose = function(queryResult) {
     }
 
     item.title = queryResult[i].title;
-    item.imageUrl = queryResult[i].image_url;
     item.url = queryResult[i].url;
+    item.imageUrl = queryResult[i].image_url;
     log.info(queryResult[i].uuid);
     results.data.push(item);
   }
