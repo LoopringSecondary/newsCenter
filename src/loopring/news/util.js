@@ -122,6 +122,7 @@ exports.constructNewsRespose = function(request, queryResult, total) {
     item.bullIndex = queryResult[i].bull_index;
     item.bearIndex = queryResult[i].bear_index;
     item.forwardNum = queryResult[i].forward_num;
+    item.readNum = queryResult[i].read_num;
     item.language = queryResult[i].language;
     item.currency = request.currency;
     log.info(item.uuid + ', ' + item.title);
@@ -139,6 +140,7 @@ exports.constructIndexRespose = function(request, result) {
   response.bullIndex = result.bullIndex;
   response.bearIndex = result.bearIndex;
   response.forwardNum = result.forwardNum;
+  response.readNum = result.readNum;
   log.info(response);
   return response;
 }
@@ -203,7 +205,7 @@ exports.updateIndex = function(request, callback) {
       var error = {code: ErrorCode.DATABASE_ERROR, message: 'DATABASE_SELECT_ERROR'};
       return callback(error, null);
     } else {
-      var result = {bullIndex: request.bullIndex, bearIndex: request.bearIndex, forwardNum: request.forwardNum};
+      var result = {bullIndex: request.bullIndex, bearIndex: request.bearIndex, forwardNum: request.forwardNum, readNum: request.readNum};
       return callback(null, result);
     }
   });

@@ -40,6 +40,7 @@ var NewsItem = module.exports.NewsItem = function(args) {
   this.forwardNum = null;
   this.language = null;
   this.currency = null;
+  this.readNum = null;
   if (args) {
     if (args.uuid !== undefined && args.uuid !== null) {
       this.uuid = args.uuid;
@@ -82,6 +83,9 @@ var NewsItem = module.exports.NewsItem = function(args) {
     }
     if (args.currency !== undefined && args.currency !== null) {
       this.currency = args.currency;
+    }
+    if (args.readNum !== undefined && args.readNum !== null) {
+      this.readNum = args.readNum;
     }
   }
 };
@@ -197,6 +201,13 @@ NewsItem.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 15:
+      if (ftype == Thrift.Type.I64) {
+        this.readNum = input.readI64();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -276,6 +287,11 @@ NewsItem.prototype.write = function(output) {
   if (this.currency !== null && this.currency !== undefined) {
     output.writeFieldBegin('currency', Thrift.Type.STRING, 14);
     output.writeString(this.currency);
+    output.writeFieldEnd();
+  }
+  if (this.readNum !== null && this.readNum !== undefined) {
+    output.writeFieldBegin('readNum', Thrift.Type.I64, 15);
+    output.writeI64(this.readNum);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -409,6 +425,7 @@ var IndexResponse = module.exports.IndexResponse = function(args) {
   this.bullIndex = null;
   this.bearIndex = null;
   this.forwardNum = null;
+  this.readNum = null;
   if (args) {
     if (args.uuid !== undefined && args.uuid !== null) {
       this.uuid = args.uuid;
@@ -421,6 +438,9 @@ var IndexResponse = module.exports.IndexResponse = function(args) {
     }
     if (args.forwardNum !== undefined && args.forwardNum !== null) {
       this.forwardNum = args.forwardNum;
+    }
+    if (args.readNum !== undefined && args.readNum !== null) {
+      this.readNum = args.readNum;
     }
   }
 };
@@ -466,6 +486,13 @@ IndexResponse.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 5:
+      if (ftype == Thrift.Type.I64) {
+        this.readNum = input.readI64();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -495,6 +522,11 @@ IndexResponse.prototype.write = function(output) {
   if (this.forwardNum !== null && this.forwardNum !== undefined) {
     output.writeFieldBegin('forwardNum', Thrift.Type.I64, 4);
     output.writeI64(this.forwardNum);
+    output.writeFieldEnd();
+  }
+  if (this.readNum !== null && this.readNum !== undefined) {
+    output.writeFieldBegin('readNum', Thrift.Type.I64, 5);
+    output.writeI64(this.readNum);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

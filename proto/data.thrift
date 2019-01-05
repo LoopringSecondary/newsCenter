@@ -85,6 +85,7 @@ struct NewsItem {
     12: i64   forwardNum
     13: string language
     14: string currency
+    15: i64   readNum
 
 }
 
@@ -100,5 +101,6 @@ struct IndexResponse {
     2: i64   bullIndex
     3: i64   bearIndex
     4: i64   forwardNum
+    5: i64   readNum
 }
 
