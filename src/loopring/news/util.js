@@ -16,6 +16,7 @@ var DataTypes            = require('../../../gen-nodejs/data_types'),
     BULL_INDEX_COLUMN    = DataTypes.BULL_INDEX_COLUMN,
     BEAR_INDEX_COLUMN    = DataTypes.BEAR_INDEX_COLUMN,
     FORWARD_NUM_COLUMN   = DataTypes.FORWARD_NUM_COLUMN,
+    READ_NUM_COLUMN      = DataTypes.READ_NUM_COLUMN,
     NEWS_INFO            = DataTypes.NEWS_INFO,
     ALL_CURRENCY         = DataTypes.ALL_CURRENCY;
 
@@ -23,8 +24,19 @@ Log4js.configure('./config/log4js.json');
 var log = Log4js.getLogger("util");
 
 function isNonNegativeInt(input) { 
-  var re =  /^\d+$/;
-  if (!re.test(input)) { 
+  var pattern = /^\d+$/;
+  if (!pattern.test(input)) { 
+    return false;
+  } 
+  return true;
+};
+
+function isValidCurrency(currency) { 
+  if(currency == ALL_CURRENCY) {
+    return true;
+  }
+  var pattern = /^[A-Za-z0-9]+$/;
+  if (!pattern.test(currency)) { 
     return false;
   } 
   return true;
@@ -42,19 +54,23 @@ exports.checkQueryNewsParms = function(requests) {
   if(!isNonNegativeInt(request.pageIndex) || !isNonNegativeInt(request.pageSize) || request.pageSize > MAX_PAGE_SIZE) {
     return false;
   }
+  if (!isValidCurrency(request.currency)) {
+    return false;
+  }
   return true;
 }
 
 exports.checkUpdateIndexParms = function(requests) {
   if (requests.length != 1) return fasle;
   var request = requests[0]; 
-  if (request.indexName != BULL_INDEX_COLUMN && request.indexName != BEAR_INDEX_COLUMN && request.indexName != FORWARD_NUM_COLUMN) {
+  if (request.indexName != BULL_INDEX_COLUMN && request.indexName != BEAR_INDEX_COLUMN 
+    && request.indexName != FORWARD_NUM_COLUMN && request.indexName != READ_NUM_COLUMN) {
     return false;
   }
   if (request.direction != -1 && request.direction != 1) {
     return false;
   }
-  if(request.indexName == FORWARD_NUM_COLUMN && request.direction != 1) {
+  if((request.indexName == FORWARD_NUM_COLUMN || request.indexName == READ_NUM_COLUMN) && request.direction != 1) {
     return false;
   }
   return true;
@@ -135,7 +151,7 @@ exports.waterFallStart = function(parms) {
 
 exports.getNewIndex = function(request, callback) {
   const tableName = NEWS_INFO;
-  var sql = 'select bull_index,bear_index,forward_num from ' + tableName + ' where uuid = "' + request.uuid + '"';
+  var sql = 'select bull_index,bear_index,forward_num,read_num from ' + tableName + ' where uuid = "' + request.uuid + '"';
   // Use the connection
   var connection = request.connection;
   connection.query(sql, function (queryErr, queryResult) {
@@ -152,7 +168,7 @@ exports.getNewIndex = function(request, callback) {
           var error = {code: ErrorCode.BUSINESS_ERROR, message: 'BUSINESS_ERROR'};
           return callback(error, null);
         } else {
-          var parms = {connection: request.connection, uuid: request.uuid, bullIndex: queryResult[0].bull_index, bearIndex: queryResult[0].bear_index, forwardNum: queryResult[0].forward_num};
+          var parms = {connection: request.connection, uuid: request.uuid, bullIndex: queryResult[0].bull_index, bearIndex: queryResult[0].bear_index, forwardNum: queryResult[0].forward_num, readNum: queryResult[0].read_num};
           switch(request.indexName) {
             case BULL_INDEX_COLUMN:
               parms.bullIndex = newIndex;
@@ -162,6 +178,9 @@ exports.getNewIndex = function(request, callback) {
               break;
             case FORWARD_NUM_COLUMN:
               parms.forwardNum = newIndex;
+              break;
+            case READ_NUM_COLUMN:
+              parms.readNum = newIndex;
               break;
             default:
               var error = {code: ErrorCode.BUSINESS_ERROR, message: 'BUSINESS_ERROR'};
@@ -176,7 +195,7 @@ exports.getNewIndex = function(request, callback) {
 
 exports.updateIndex = function(request, callback) {
   const tableName = NEWS_INFO;
-  var sql = 'update ' + tableName + ' set bull_index = ' + request.bullIndex + ', bear_index = ' + request.bearIndex + ', forward_num = ' + request.forwardNum + ', update_time = now() where uuid = "' + request.uuid + '"';
+  var sql = 'update ' + tableName + ' set bull_index = ' + request.bullIndex + ', bear_index = ' + request.bearIndex + ', forward_num = ' + request.forwardNum + ', read_num = ' + request.readNum + ', update_time = now() where uuid = "' + request.uuid + '"';
   log.info(sql);
   request.connection.query(sql, function (queryErr, queryResult) {
     if(queryErr) {

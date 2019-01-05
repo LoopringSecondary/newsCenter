@@ -50,6 +50,7 @@ const string FLASH = "flash";
 const string BULL_INDEX_COLUMN = "bull_index";
 const string BEAR_INDEX_COLUMN = "bear_index";
 const string FORWARD_NUM_COLUMN = "forward_num";
+const string READ_NUM_COLUMN = "read_num";
 
 ///////////////////////////////////////////////////////////////////////
 /////////////////////////////// LANGUAGE //////////////////////////////
