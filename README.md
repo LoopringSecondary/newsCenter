@@ -13,7 +13,7 @@
 ```
 curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"queryNews","params":[{"currency":"LRC","language":"zh-Hans","category":"information","pageIndex":0,"pageSize":1}],"id":64}'
 ```
-注：currency选择ALL_CURRENCY代表查询全部币种；其余具体币种一般推荐使用对应的大写缩写名称，如LRC。  
+**注**：currency选择ALL_CURRENCY代表查询全部币种；其余具体币种一般推荐使用对应的大写缩写名称，如LRC。  
 
 Normal respose
 ```
@@ -53,6 +53,7 @@ Abnormal response
 ```
 curl localhost:5555 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"updateIndex","params":[{"uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU","indexName":"bull_index", "direction":1}],"id":64}'
 ```
+**注**：目前可以更新的项目有四个，分别是：bull_index,bear_index,forward_num以及read_num;  
 Normal response
 ```
 {
