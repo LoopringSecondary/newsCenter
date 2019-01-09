@@ -37,7 +37,8 @@ Normal respose
             "imageUrl":"",
             "bullIndex":4,
             "bearIndex":0,
-            "forwardNum":0}
+            "forwardNum":0,
+            "readNum":0}
         ],
     "pageIndex":0,
     "pageSize":5
@@ -63,7 +64,8 @@ Normal response
     "uuid":"FceDsvh7gpfCmyS2IYN2D0kHfcU",
     "bullIndex":4,
     "bearIndex":0,
-    "forwardNum":0
+    "forwardNum":0,
+    "readNum":0
     }
 }
 ```
