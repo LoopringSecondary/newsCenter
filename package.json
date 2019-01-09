@@ -1,0 +1,28 @@
+{
+  "name": "newsCenter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Loopring/newsCenter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Loopring/newsCenter/issues"
+  },
+  "homepage": "https://github.com/Loopring/newsCenter#readme",
+  "dependencies": {
+    "async": "^2.6.1",
+    "jayson": "^2.1.1",
+    "log4js": "^3.0.6",
+    "moment": "^2.23.0",
+    "mysql": "^2.16.0",
+    "thrift": "^0.11.0"
+  }
+}

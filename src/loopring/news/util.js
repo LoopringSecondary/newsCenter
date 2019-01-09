@@ -231,7 +231,6 @@ exports.constructScrollingInfoRespose = function(queryResult) {
   var results = new NewsCollection();            
   results.data = [];
   var item = new NewsItem();
-  console.log(queryResult);
   for (var i = 0; i < queryResult.length; i++) {
     var item = new NewsItem();
     if (queryResult[i].title == null || queryResult[i].image_url == null) {
