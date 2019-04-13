@@ -43,7 +43,7 @@ function isValidCurrency(currency) {
 };
 
 exports.checkQueryNewsParms = function(requests) {
-  if (requests.length != 1) return fasle;
+  if (requests.length != 1) return false;
   var request = requests[0]; 
   if(request.category != INFORMATION && request.category != FLASH) {
     return false;
